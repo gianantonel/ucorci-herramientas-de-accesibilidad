@@ -14,7 +14,7 @@ Herramientas gratuitas de la Unión Cordobesa de Ciegos, Córdoba, Argentina, pa
 
 Nombre, apellido, correo y contraseña (mínimo 12 caracteres). Contraseñas con bcrypt, nunca en texto plano. Auth.js usa cookies HttpOnly para sesiones de hasta 90 días, SameSite y Secure en HTTPS. Los campos usan `autocomplete` para gestores de contraseñas; la aplicación no guarda contraseñas en localStorage.
 
-OAuth preparado para Google, Apple, Facebook y GitHub; solo aparecen proveedores con credenciales configuradas. No se vinculan automáticamente cuentas diferentes por coincidencia de email. Un nuevo usuario social completa su nombre y apellido antes de usar las herramientas. Las cuentas creadas con contraseña aún no verifican la titularidad del correo ni ofrecen recuperación por email: SMTP y flujo de recuperación son trabajo pendiente y no se simulan.
+Google y GitHub están disponibles mediante InsForge. Apple y Facebook están preparados y necesitan credenciales propias; solo aparecen cuando están configurados. No se vinculan automáticamente cuentas diferentes por coincidencia de email. Un nuevo usuario social completa su nombre y apellido antes de usar las herramientas. Las cuentas creadas con contraseña aún no verifican la titularidad del correo ni ofrecen recuperación por email: SMTP y flujo de recuperación son trabajo pendiente y no se simulan.
 
 La producción usa PostgreSQL en el proyecto separado **UCORCI-herramientas-de-accesibilidad** de InsForge, elegido por el titular. SQLite permanece como alternativa para desarrollo local y pruebas. La base guarda cuentas y métricas (herramienta, duración, resultado y fecha). No guarda documentos, textos ni audios. Google recibe el texto al generar audio. Una persona puede exportar o borrar sus datos desde Mi cuenta. No existe un endpoint público que liste usuarios o métricas de otras personas.
 
@@ -103,3 +103,14 @@ PDF escaneado: OCR todavía no incluido. DOC y XLS antiguos: convertir a DOCX/XL
 Fuentes técnicas: [gTTS](https://gtts.readthedocs.io/en/latest/module.html), [Transformers.js](https://huggingface.co/docs/transformers.js/api/pipelines), [faster-whisper](https://github.com/SYSTRAN/faster-whisper), [Auth.js](https://authjs.dev/reference/express), [limitaciones de Vercel](https://vercel.com/docs/functions/limitations).
 
 Comic Neue se incluye con su licencia OFL en `public/fonts/OFL.txt`.
+
+## Verificación de esta versión
+
+- 3 pruebas de servidor/texto: registro, bcrypt, sesiones, CSRF, aislamiento de datos, métricas, exportación y revocación al eliminar la cuenta.
+- 4 pruebas completas de navegador: buscador y preferencias, auditoría axe en los tres contrastes, reflujo móvil al 200 %, registro y lectura adaptada, extracción real de TXT/HTML/PDF/DOCX/XLSX, generación real de MP3/WAV y transcripción real con Whisper base.
+- Prueba pública contra PostgreSQL: registro y sesión persistente, métricas y exportación privadas, inicio de OAuth Google/GitHub, generación MP3 y eliminación de la cuenta temporal.
+- `npm audit`: sin vulnerabilidades conocidas al verificar esta versión. Las pruebas manuales con lectores de pantalla siguen pendientes.
+
+La prueba que descarga el modelo se activa con `RUN_AUDIO_TESTS=1 npm run test:e2e`. El flujo social completo requiere una persona que autorice su propia identidad; se verificaron los callbacks configurados y el inicio PKCE con los proveedores reales.
+
+Para despliegues automáticos desde GitHub, Vercel debe tener instalada su aplicación de GitHub con acceso **solo** al repositorio `ucorci-herramientas-de-accesibilidad`. La publicación inicial y las actualizaciones de esta entrega se hicieron con la CLI.

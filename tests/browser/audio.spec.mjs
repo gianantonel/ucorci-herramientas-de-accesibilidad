@@ -44,11 +44,14 @@ test("genera MP3 y WAV reales y transcribe el audio con Whisper base", async ({
   ]);
   await mp3.saveAs("data/voice-sample.mp3");
   expect(readFileSync("data/voice-sample.mp3").length).toBeGreaterThan(1000);
+  console.log("MP3 real descargado.");
   await page.getByLabel("Formato de descarga").selectOption("wav");
+  console.log("Formato WAV seleccionado.");
   await expect(page.getByRole("heading", { name: "Tu audio está listo" })).not.toBeVisible();
   await page
     .getByRole("button", { name: "Generar audio", exact: true })
     .click();
+  console.log("Generación de WAV solicitada.");
   await expect(
     page.getByRole("heading", { name: "Tu audio está listo" }),
   ).toBeVisible({ timeout: 65000 });

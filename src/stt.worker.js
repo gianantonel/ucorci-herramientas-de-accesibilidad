@@ -29,6 +29,7 @@ self.onmessage = async ({ data }) => {
     });
     self.postMessage({ status: "done", text: result.text });
   } catch (error) {
+    console.error("UCORCI Whisper:", error.message);
     transcriber = null;
     self.postMessage({
       status: "error",

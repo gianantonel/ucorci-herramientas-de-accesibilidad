@@ -42,6 +42,10 @@ test("índice, buscador, contraste, tamaño y fuente persistentes; sin infraccio
     ),
   ).toBe(true);
   await page.screenshot({ path: "data/ucorci-mobile.png", fullPage: true });
+  await page.getByLabel("Texto", { exact: true }).selectOption("200");
+  expect(
+    await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth),
+  ).toBe(true);
 });
 
 test("registro, sesión recordada, lectura adaptada, exportación y cuenta privada", async ({

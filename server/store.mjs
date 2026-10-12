@@ -138,6 +138,21 @@ export async function updateUser(id, changes) {
 }
 export async function deleteUser(id) {
   if (isInsforge()) {
+    const identities = await checked(
+      from("accounts")
+        .select("providerAccountId")
+        .eq("userId", id)
+        .eq("provider", "insforge"),
+    );
+    if (identities.length) {
+      const adminClient = createAdminClient({
+        baseUrl: process.env.INSFORGE_URL,
+        apiKey: process.env.INSFORGE_API_KEY,
+      });
+      await adminClient.getHttpClient().delete("/api/auth/users", {
+        body: { userIds: identities.map((identity) => identity.providerAccountId) },
+      });
+    }
     await checked(from("users").delete().eq("id", id));
     return;
   }

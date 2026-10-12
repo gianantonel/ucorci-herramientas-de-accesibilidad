@@ -1021,7 +1021,7 @@ function TTS({ requireUser, metric }) {
             {error}
           </p>
         )}
-        {url && (
+        {audio && url && (
           <section className="result" aria-label="Audio generado">
             <h2>Tu audio está listo</h2>
             <audio controls src={url} aria-label="Escuchar audio generado" />
