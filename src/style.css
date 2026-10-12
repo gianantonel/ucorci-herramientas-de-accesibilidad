@@ -216,17 +216,29 @@ h3 {
 .brand {
   text-decoration: none;
   display: flex;
-  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
   line-height: 1.3;
 }
 .brand strong {
   font-size: 2rem;
   letter-spacing: 0.08em;
 }
-.brand span {
+.brand-subtitle {
   font-size: 0.85rem;
   color: var(--muted);
   margin-top: 0.3rem;
+}
+.brand-text {
+  display: flex;
+  flex-direction: column;
+}
+.brand-logo {
+  width: 80px;
+  height: 80px;
+  object-fit: contain;
+  flex-shrink: 0;
+  border-radius: 50%;
 }
 .preferences {
   display: flex;
@@ -234,16 +246,49 @@ h3 {
   flex-wrap: wrap;
   align-items: end;
 }
-.preferences label {
-  font-size: 0.78rem;
-  color: var(--muted);
-  margin-bottom: 0.35rem;
+.preference {
+  position: relative;
+  border: 0;
+  padding: 0;
 }
-.preferences select {
+.preference summary {
   font-size: 0.85rem;
+  min-height: 46px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 5px;
+  padding: 0.65rem 0.8rem;
+}
+.preference-options {
+  position: absolute;
+  right: 0;
+  z-index: 20;
+  margin: 0.5rem 0 0;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  padding: 1rem;
+  min-width: min(16rem, calc(100vw - 2.5rem));
+  max-width: calc(100vw - 2.5rem);
+  box-shadow: 0 8px 20px #0006;
+}
+.preference-options legend {
+  font-size: 0.85rem;
+}
+.preference-options label {
+  display: flex;
+  gap: 0.75rem;
+  align-items: center;
+  color: var(--text);
+  font-size: 0.95rem;
+  padding: 0.5rem;
   min-height: 44px;
-  padding: 0.6rem 0.65rem;
-  padding-right: 1.4rem;
+  margin: 0;
+}
+.preference-options input {
+  width: 1.15rem;
+  min-height: 1.15rem;
+  flex-shrink: 0;
+  accent-color: var(--accent);
 }
 .topnav {
   max-width: 1400px;
@@ -677,18 +722,25 @@ dialog > p {
   }
   .preferences {
     width: 100%;
+    position: relative;
     max-width: none;
     gap: 0.6rem;
   }
-  .preferences > div {
+  .preferences > details {
     flex: 1;
     min-width: 90px;
+    position: static;
   }
-  .preferences select {
+  .preference-options {left:0;right:0;min-width:0;max-width:100%;}
+  .preferences summary {
     width: 100%;
   }
   .brand strong {
     font-size: 1.7rem;
+  }
+  .brand-logo {
+    width: 64px;
+    height: 64px;
   }
   .topnav {
     padding: 0.65rem 1.25rem;

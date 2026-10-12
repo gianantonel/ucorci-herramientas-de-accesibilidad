@@ -289,52 +289,58 @@ function App() {
           className="brand"
           href="#herramientas"
           onClick={() => navigate("home")}
-          aria-label="UCORCI, inicio"
+          aria-label="UCORCI, Unión Cordobesa de Ciegos. Inicio"
         >
-          <strong>UCORCI</strong>
-          <span>Unión Cordobesa de Ciegos</span>
+          <img
+            className="brand-logo"
+            src="/logo-ucorci.png"
+            alt=""
+            width="80"
+            height="80"
+          />
+          <span className="brand-text">
+            <strong>UCORCI</strong>
+            <span className="brand-subtitle">Unión Cordobesa de Ciegos</span>
+          </span>
         </a>
         <div
           className="preferences"
           role="group"
           aria-label="Preferencias de accesibilidad"
         >
-          <div>
-            <label htmlFor="contrast">Contraste</label>
-            <select
-              id="contrast"
-              value={theme}
-              onChange={(e) => setTheme(e.target.value)}
-            >
-              <option value="dark">Oscuro</option>
-              <option value="light">Claro</option>
-              <option value="yellow">Amarillo sobre negro</option>
-            </select>
-          </div>
-          <div>
-            <label htmlFor="font">Fuente</label>
-            <select
-              id="font"
-              value={font}
-              onChange={(e) => setFont(e.target.value)}
-            >
-              <option value="standard">Estándar</option>
-              <option value="dyslexia">Comic Sans</option>
-            </select>
-          </div>
-          <div>
-            <label htmlFor="size">Texto</label>
-            <select
-              id="size"
-              value={size}
-              onChange={(e) => setSize(e.target.value)}
-            >
-              <option value="100">100 %</option>
-              <option value="125">125 %</option>
-              <option value="150">150 %</option>
-              <option value="200">200 %</option>
-            </select>
-          </div>
+          <Preference
+            id="contrast"
+            label="Contraste"
+            value={theme}
+            onChange={setTheme}
+            options={[
+              ["dark", "Oscuro"],
+              ["light", "Claro"],
+              ["yellow", "Amarillo sobre negro"],
+            ]}
+          />
+          <Preference
+            id="font"
+            label="Fuente"
+            value={font}
+            onChange={setFont}
+            options={[
+              ["standard", "Estándar"],
+              ["dyslexia", "Comic Sans"],
+            ]}
+          />
+          <Preference
+            id="size"
+            label="Texto"
+            value={size}
+            onChange={setSize}
+            options={[
+              ["100", "100 %"],
+              ["125", "125 %"],
+              ["150", "150 %"],
+              ["200", "200 %"],
+            ]}
+          />
         </div>
       </header>
       <nav className="topnav" aria-label="Navegación principal">
@@ -774,6 +780,57 @@ function App() {
         )}
       </dialog>
     </>
+  );
+}
+function Preference({ id, label, value, options, onChange }) {
+  const disclosure = useRef(),
+    summary = useRef();
+  const current =
+    options.find(([option]) => option === value)?.[1] || options[0][1];
+  function close() {
+    disclosure.current.open = false;
+    summary.current.focus();
+  }
+  return (
+    <details
+      ref={disclosure}
+      className="preference"
+      name="ucorci-preferences"
+      onKeyDown={(event) => {
+        if (event.key === "Escape") {
+          event.preventDefault();
+          close();
+        }
+      }}
+    >
+      <summary ref={summary}>
+        {label}: {current}
+      </summary>
+      <fieldset className="preference-options">
+        <legend>{label}</legend>
+        {options.map(([option, text]) => (
+          <label key={option}>
+            <input
+              type="radio"
+              name={"preference-" + id}
+              value={option}
+              checked={value === option}
+              onChange={() => onChange(option)}
+              onClick={(event) => {
+                if (event.detail > 0) close();
+              }}
+              onKeyDown={(event) => {
+                if (event.key === "Enter") {
+                  event.preventDefault();
+                  close();
+                }
+              }}
+            />
+            <span>{text}</span>
+          </label>
+        ))}
+      </fieldset>
+    </details>
   );
 }
 function Field({ label, id, ...props }) {

@@ -2,6 +2,14 @@ import { test, expect } from "@playwright/test";
 import AxeBuilder from "@axe-core/playwright";
 import { existsSync, mkdirSync } from "node:fs";
 import { resolve } from "node:path";
+async function choosePreference(page, label, option) {
+  const control = page
+    .locator("details.preference")
+    .filter({ has: page.locator("summary").filter({ hasText: label + ":" }) });
+  if(await control.getAttribute('open')===null)await control.locator("summary").click();
+  await control.getByRole("radio", { name: option, exact: true }).check();
+  if(await control.getAttribute('open')!==null)await control.locator('summary').press('Escape');
+}
 
 test("índice, buscador, contraste, tamaño y fuente persistentes; sin infracciones axe", async ({
   page,
@@ -14,25 +22,31 @@ test("índice, buscador, contraste, tamaño y fuente persistentes; sin infraccio
   await expect(page.getByRole("article")).toHaveCount(1);
   await page.getByLabel("Buscar una herramienta").fill("");
   for (const theme of ["dark", "light", "yellow"]) {
-    await page.getByLabel("Contraste", { exact: true }).selectOption(theme);
+    await choosePreference(
+      page,
+      "Contraste",
+      { dark: "Oscuro", light: "Claro", yellow: "Amarillo sobre negro" }[theme],
+    );
     const results = await new AxeBuilder({ page })
       .withTags(["wcag2a", "wcag2aa", "wcag21aa", "wcag22aa"])
       .analyze();
     expect(results.violations, JSON.stringify(results.violations)).toEqual([]);
   }
-  await page.getByLabel("Fuente", { exact: true }).selectOption("dyslexia");
-  await page.getByLabel("Texto", { exact: true }).selectOption("150");
+  await choosePreference(page, "Fuente", "Comic Sans");
+  await choosePreference(page, "Texto", "150 %");
   await page.reload();
-  await expect(page.getByLabel("Contraste", { exact: true })).toHaveValue(
-    "yellow",
-  );
-  await expect(page.getByLabel("Fuente", { exact: true })).toHaveValue(
-    "dyslexia",
-  );
-  await expect(page.getByLabel("Texto", { exact: true })).toHaveValue("150");
-  await page.getByLabel("Contraste", { exact: true }).selectOption("dark");
-  await page.getByLabel("Fuente", { exact: true }).selectOption("standard");
-  await page.getByLabel("Texto", { exact: true }).selectOption("100");
+  await expect(
+    page.locator("summary").filter({ hasText: "Contraste:" }),
+  ).toHaveText("Contraste: Amarillo sobre negro");
+  await expect(
+    page.locator("summary").filter({ hasText: "Fuente:" }),
+  ).toHaveText("Fuente: Comic Sans");
+  await expect(
+    page.locator("summary").filter({ hasText: "Texto:" }),
+  ).toHaveText("Texto: 150 %");
+  await choosePreference(page, "Contraste", "Oscuro");
+  await choosePreference(page, "Fuente", "Estándar");
+  await choosePreference(page, "Texto", "100 %");
   mkdirSync("data", { recursive: true });
   await page.screenshot({ path: "data/ucorci-desktop.png", fullPage: true });
   await page.setViewportSize({ width: 390, height: 844 });
@@ -42,9 +56,11 @@ test("índice, buscador, contraste, tamaño y fuente persistentes; sin infraccio
     ),
   ).toBe(true);
   await page.screenshot({ path: "data/ucorci-mobile.png", fullPage: true });
-  await page.getByLabel("Texto", { exact: true }).selectOption("200");
+  await choosePreference(page, "Texto", "200 %");
   expect(
-    await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth),
+    await page.evaluate(
+      () => document.documentElement.scrollWidth <= window.innerWidth,
+    ),
   ).toBe(true);
 });
 
@@ -116,25 +132,21 @@ test("registro, sesión recordada, lectura adaptada, exportación y cuenta priva
 
 test("extrae TXT, HTML, PDF, DOCX y todas las hojas XLSX", async ({ page }) => {
   await page.goto("/#tts");
-  await page
-    .getByLabel("Cargar un documento")
-    .setInputFiles({
-      name: "documento.txt",
-      mimeType: "text/plain",
-      buffer: Buffer.from("Texto desde TXT"),
-    });
+  await page.getByLabel("Cargar un documento").setInputFiles({
+    name: "documento.txt",
+    mimeType: "text/plain",
+    buffer: Buffer.from("Texto desde TXT"),
+  });
   await expect(page.getByLabel("Texto para convertir a voz")).toHaveValue(
     "Texto desde TXT",
   );
-  await page
-    .getByLabel("Cargar un documento")
-    .setInputFiles({
-      name: "documento.html",
-      mimeType: "text/html",
-      buffer: Buffer.from(
-        '<h1>Texto HTML</h1><script>alert("no ejecutar")</script><p>Segundo párrafo</p>',
-      ),
-    });
+  await page.getByLabel("Cargar un documento").setInputFiles({
+    name: "documento.html",
+    mimeType: "text/html",
+    buffer: Buffer.from(
+      '<h1>Texto HTML</h1><script>alert("no ejecutar")</script><p>Segundo párrafo</p>',
+    ),
+  });
   await expect(page.getByLabel("Texto para convertir a voz")).toHaveValue(
     /Texto HTML/,
   );
