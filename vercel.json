@@ -1,0 +1,8 @@
+{
+  "buildCommand": "npm run build",
+  "outputDirectory": "dist",
+  "framework": "vite",
+  "functions": {"api/tts.py": {"maxDuration": 60}, "api/index.mjs": {"maxDuration": 30}},
+  "rewrites": [{"source": "/api/tts", "destination": "/api/tts.py"}, {"source": "/api/:path*", "destination": "/api/index.mjs"}, {"source": "/:path*", "destination": "/index.html"}],
+  "headers": [{"source": "/(.*)", "headers": [{"key": "X-Content-Type-Options", "value": "nosniff"}, {"key": "Referrer-Policy", "value": "strict-origin-when-cross-origin"}, {"key": "X-Frame-Options", "value": "DENY"}, {"key": "Permissions-Policy", "value": "camera=(), geolocation=()"}]}]
+}

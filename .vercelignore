@@ -1,0 +1,10 @@
+.git
+.env
+.env.local
+data
+.python-local
+local-whisper
+tests
+test-results
+playwright-report
+node_modules
