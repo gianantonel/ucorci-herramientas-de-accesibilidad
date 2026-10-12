@@ -16,7 +16,7 @@ Nombre, apellido, correo y contraseña (mínimo 12 caracteres). Contraseñas con
 
 OAuth preparado para Google, Apple, Facebook y GitHub; solo aparecen proveedores con credenciales configuradas. No se vinculan automáticamente cuentas diferentes por coincidencia de email. Un nuevo usuario social completa su nombre y apellido antes de usar las herramientas. Las cuentas creadas con contraseña aún no verifican la titularidad del correo ni ofrecen recuperación por email: SMTP y flujo de recuperación son trabajo pendiente y no se simulan.
 
-SQLite guarda cuentas y métricas (herramienta, duración, resultado y fecha). No guarda documentos, textos ni audios. Google recibe el texto al generar audio. Una persona puede exportar o borrar sus datos desde Mi cuenta. No existe un endpoint público que liste usuarios o métricas de otras personas.
+La producción usa PostgreSQL en el proyecto separado **UCORCI-herramientas-de-accesibilidad** de InsForge, elegido por el titular. SQLite permanece como alternativa para desarrollo local y pruebas. La base guarda cuentas y métricas (herramienta, duración, resultado y fecha). No guarda documentos, textos ni audios. Google recibe el texto al generar audio. Una persona puede exportar o borrar sus datos desde Mi cuenta. No existe un endpoint público que liste usuarios o métricas de otras personas.
 
 ## Desarrollo local
 
@@ -41,18 +41,28 @@ node server/metrics.mjs
 
 El informe de métricas es administrativo y se ejecuta en un entorno con acceso a la base. No publicar su credencial en el frontend.
 
-## Vercel y SQLite persistente
+## Vercel e InsForge PostgreSQL
+
+Proyecto InsForge: `dccb03fc-63c3-4217-a71c-21edc26625d9`, nombre `UCORCI-herramientas-de-accesibilidad`. Es independiente de `en-una-nota`.
+
+Variables de producción: `INSFORGE_URL`, `INSFORGE_API_KEY`, `INSFORGE_ANON_KEY`, `AUTH_SECRET` y `APP_URL`. La clave administrativa **solo se usa en las funciones del servidor**, nunca en variables `VITE_` ni en el navegador. La migración está en `migrations/20261012222803_create-ucorci-schema.sql`; se aplica con `npx @insforge/cli db migrations up --all`.
+
+Las tablas `ucorci_users`, `ucorci_accounts`, `ucorci_usage_events` y `ucorci_rate_limits` tienen RLS y revocación de acceso directo a `anon` y `authenticated`. Auth.js verifica la sesión en Vercel y el SDK administrativo realiza únicamente la operación autorizada para ese usuario. Las funciones de limitación de intentos e informe de métricas son exclusivamente administrativas.
+
+Google y GitHub usan los proveedores integrados de InsForge, con PKCE, verifier en cookie HttpOnly de corta duración, intercambio de código en servidor y cookie de sesión Auth.js cifrada. Callback: `https://ucorci-herramientas-de-accesibilidad.vercel.app/api/oauth/callback`. Las cuentas nuevas completan nombre y apellido; no se vincula automáticamente un acceso social a una cuenta con contraseña que ya usa ese email.
+
+## Alternativa: Vercel y SQLite persistente
 
 **No usar `file:` ni `/tmp` en Vercel para registros reales.** Sus funciones no garantizan un archivo SQLite compartido y persistente. Usar SQLite remoto compatible con libSQL (por ejemplo Turso) o adaptar el cliente a otro servicio SQLite. Un proyecto PostgreSQL de InsForge no es SQLite.
 
 Variables de entorno del servidor:
 
-| Variable | Valor |
-| --- | --- |
-| `DATABASE_URL` | URL `libsql://` de una base SQLite persistente |
-| `DATABASE_AUTH_TOKEN` | Token privado de esa base |
-| `AUTH_SECRET` | Secreto aleatorio estable, al menos 32 caracteres |
-| `APP_URL` | `https://ucorci-herramientas-de-accesibilidad.vercel.app` |
+| Variable              | Valor                                                     |
+| --------------------- | --------------------------------------------------------- |
+| `DATABASE_URL`        | URL `libsql://` de una base SQLite persistente            |
+| `DATABASE_AUTH_TOKEN` | Token privado de esa base                                 |
+| `AUTH_SECRET`         | Secreto aleatorio estable, al menos 32 caracteres         |
+| `APP_URL`             | `https://ucorci-herramientas-de-accesibilidad.vercel.app` |
 
 La aplicación crea automáticamente el esquema en el primer acceso. También se puede ejecutar `npm run db:init` con las mismas variables en un entorno administrativo. Si falta SQLite persistente, el servidor devuelve 503 y el sitio informa que el registro está pendiente de configuración; no se simula una cuenta.
 

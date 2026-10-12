@@ -1,10 +1,16 @@
 .git
+.vercel
+.insforge
+.agents
+.agent
+.codex
 .env
 .env.local
 data
 .python-local
 local-whisper
 tests
+test-results
 test-results
 playwright-report
 node_modules

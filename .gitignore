@@ -15,3 +15,22 @@ __pycache__/
 test-results/
 playwright-report/
 *.log
+
+.vercel
+.env*
+!.env.example
+
+# InsForge & AI agent skills
+.insforge
+.agent
+.agents
+.augment
+.claude
+.cline
+.github/copilot*
+.kilocode
+.qoder
+.qwen
+.roo
+.trae
+.windsurf

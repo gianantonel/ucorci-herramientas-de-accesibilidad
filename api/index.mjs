@@ -1,1 +1,1 @@
-export {default} from '../server/app.mjs';
+export { default } from "../server/app.mjs";
